@@ -47,7 +47,6 @@ const MainWrapper = () => {
                 const newVideo = await myResults.items[0];
                 setPlayList(playList =>[...playList, newVideo]) // this whole object will be diffrenet
                 console.log(response)
-                // add a disabled function to the button to disable it while the request is being proccessed
                 await db.ref("videos").push(newVideo);
                 setError(false)
                 setErrorMessage('')
