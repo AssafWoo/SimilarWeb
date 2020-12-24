@@ -5,7 +5,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 
 
 
-const PlayList = ({myPlayList, handleClick, handleRemove, current}) => {
+const PlayList = ({myPlayList, handleClick, handleRemove}) => {
 
     const Click = (ele, index) => {handleClick(ele, index)}
 
@@ -16,7 +16,7 @@ const PlayList = ({myPlayList, handleClick, handleRemove, current}) => {
             <PlayListWrapper>
                 <List>
                     {myPlayList && myPlayList.map((ele, index) => (
-                        <Li className={ele.id === current.id ? 'current' : ''} key={ele.id} onClick={() => Click(ele, index)}>
+                        <Li key={ele.id} onClick={() => Click(ele, index)}>
                             <Image style={{margin:'.5rem'}} src={ele.snippet.thumbnails.default.url} />
                             <VideoHeader>
                                 <span><b>{ele.snippet.title}</b></span>

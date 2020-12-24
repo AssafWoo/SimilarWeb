@@ -3,9 +3,12 @@ import {mainGrey} from '../common/colors';
 
 export const PlayListWrapper = styled.div`
     padding-right:2rem;
-    flex:2 0 35%;
+    flex:0 0 33%;
     justify-content: center;
     align-items: center;
+    @media (max-width: 1231px) {
+        flex:2 0 100%;
+  }
 `
 
 export const List = styled.ul`

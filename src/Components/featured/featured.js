@@ -3,14 +3,17 @@ import ReactPlayer from 'react-player'
 import {Wrapper} from './style';
 
 const FeaturedVideo = ({id, handleFinishedVideo}) => {
+
+
     const handleDone = () => {
         if(handleFinishedVideo){
             handleFinishedVideo();
         }
     }
+
     return (
         <Wrapper>
-            <ReactPlayer onEnded={() => handleDone()} url={`https://www.youtube.com/watch?v=${id}`} />
+            {id ? <ReactPlayer style={{width:'100%'}} controls={true} playing={true} onEnded={() => handleDone()} url={`https://www.youtube.com/watch?v=${id}`} /> : 'Add Videos...' }
         </Wrapper>
     )
 }

@@ -1,15 +1,15 @@
-import React, { Fragment, useState,useEffect, useCallback} from 'react';
+import React, { useState,useEffect, useCallback} from 'react';
 import PlayList from '../playlist/playlist';
-import {Wrapper, FlexWrapper, SearchBar, Header, ButtonSide} from './style';
+import {Wrapper, FlexWrapper, Header} from './style';
 import {Button, TextField} from '@material-ui/core';
 import FeaturedVideo from '../featured/featured';
-import {db} from '../../firebase';
-import axios from 'axios';
+import {db} from '../../services/firebase/firebase';
+import{validateURL} from '../../services/validation/validate';
+import {FetchUrl} from '../../services/api/api_call';
 
 
 const MainWrapper = () => {
     const [searchValue, setSearchValue] = useState('');
-    const [data, setData] = useState();
     const [playList, setPlayList] = useState([])
     const [errorMessage, setErrorMessage] = useState('')
     const [error, setError] = useState(false)
@@ -23,60 +23,66 @@ const MainWrapper = () => {
             snapshot.forEach((snap) => {
                 videos.push(snap.val());
               });
-            console.log(videos)
             setPlayList( videos );
-            setCurrent(videos[0])
+            if(playList) setCurrent(videos[0]);
         })
     }, [])
 
-    useEffect(() => { // debounce function
+    useEffect(() => {
+        if(playList.length === 0) setCurrent([])
+    },[playList])
+
+    useEffect(() => { 
         const delayDebounceFn = setTimeout(async() => {
-            console.log(searchValue)
-        }, 2000)
+            // can be a future options call for autocomplete.
+        }, 1500)
         return () => clearTimeout(delayDebounceFn)
       }, [searchValue])
 
 
     const handleSubmit = useCallback(async () => { // submit button that checks if the value is valid.
-        if(searchValue){
-            setSearchValue('')
-            const apiEndPoint = `https://youtube.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatistics&id=${searchValue}&key=AIzaSyDiYyqBeSz8n57FzYYhMUzues6wzFh24p4`;
+        if(searchValue && validateURL(searchValue)){
+            let videoID = extractIdFromURL(searchValue);
             try {
-                const response = await axios.get(apiEndPoint);
-                const myResults = await response.data;
-                const newVideo = await myResults.items[0];
-                setPlayList(playList =>[...playList, newVideo]) // this whole object will be diffrenet
-                console.log(response)
-                await db.ref("videos").push(newVideo);
+                setIsFetching(true);
+                const myVideo = await FetchUrl(videoID)
+                console.log(myVideo);
+                setPlayList(playList =>[...playList, myVideo])
+                await db.ref("videos").push(myVideo);
                 setError(false)
                 setErrorMessage('')
+                setSearchValue('')
+                setIsFetching(false);
             } catch(e) {
+                setError(true)
+                setErrorMessage('Something went wrong...')
                 console.error(e);
             }
-
         } else {
             setError(true)
             setErrorMessage('Please enter a valid input')
         }
-    },[searchValue])
+    })
 
-
-
-    const handleClick = (ele, index) => {
-        if(playList.length > 0) {
-            setCurrent(playList[index])
-        }
+    const extractIdFromURL = (url) => {
+        let id = url.substring(
+            url.lastIndexOf("v=")+2, 
+            url.lastIndexOf("&")
+        );
+        return id;
     }
+
+    const handleClick = (ele, index) => { if(playList.length > 0) setCurrent(playList[index]) }
 
     const handleFinishedVideo = () => {
         const myIndex = playList.indexOf(current);
-        console.log(myIndex + 1)
         setCurrent(playList[myIndex + 1])
+        handleRemove(current, myIndex)
     }
 
 
-    const handleRemove = async (ele, index) => {
-        console.log(index)
+    const handleRemove = async (ele) => {
+        const index = playList.indexOf(ele);
         let targetVideo;
         db.ref("videos").on('value', snapshot => {
             snapshot.forEach((snap) => {
@@ -85,23 +91,18 @@ const MainWrapper = () => {
         })
         db.ref('videos').child(`${targetVideo}`).remove()
         setPlayList(playList.filter(item => item.id !== ele.id))
-        if(current.id === ele.id && index !== playList.length - 1) {
-            setCurrent(playList[index+1])
-        }
     }
 
     return (
         <Wrapper>
             <Header>
-                <SearchBar>
-                    <TextField className="mg-right-3" helperText={errorMessage} onChange={(e) => setSearchValue(e.target.value)}label="Search Video Id" error={error}/>
-                </SearchBar>
-                <ButtonSide>
+                <div>
+                    <TextField className="mg-right-3" value={searchValue} helperText={errorMessage} onChange={(e) => setSearchValue(e.target.value)}label="Enter Video URL" error={error}/>
                     <Button disabled={isFetching} size="small" variant="contained" color="primary" type="submit" onClick={handleSubmit}>add</Button> 
-                </ButtonSide>
+                </div>
             </Header>
             <FlexWrapper>
-            <PlayList handleRemove={handleRemove} myPlayList={playList} handleClick={handleClick} current={current} />
+            <PlayList handleRemove={handleRemove} myPlayList={playList} handleClick={handleClick}/>
                 <FeaturedVideo handleFinishedVideo={handleFinishedVideo} id={current && current.id} />
             </FlexWrapper>
 
