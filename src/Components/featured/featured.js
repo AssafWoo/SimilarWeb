@@ -13,7 +13,8 @@ const FeaturedVideo = ({id, handleFinishedVideo}) => {
 
     return (
         <Wrapper>
-            {id ? <ReactPlayer style={{width:'100%'}} controls={true} playing={true} onEnded={() => handleDone()} url={`https://www.youtube.com/watch?v=${id}`} /> : 'Add Videos...' }
+            {id ? <ReactPlayer style={{width:'100%', display:'inline-block'}} controls={true} playing={true} onEnded={() => handleDone()} url={`https://www.youtube.com/watch?v=${id}`} /> 
+            : 'Add Videos...' }
         </Wrapper>
     )
 }

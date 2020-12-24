@@ -1,16 +1,15 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { List, PlayListWrapper, Li, VideoHeader, Image} from './style';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 
 
 
-const PlayList = ({myPlayList, handleClick, handleRemove}) => {
+const PlayList = ({myPlayList, handleRemove}) => {
 
     const Remove = (ele, index) => {handleRemove(ele, index)}
 
     return (
-        <Fragment>
             <PlayListWrapper>
                 <List>
                     {myPlayList && myPlayList.map((ele, index) => (
@@ -22,7 +21,7 @@ const PlayList = ({myPlayList, handleClick, handleRemove}) => {
 
                             </VideoHeader>
                             <br />
-                            <IconButton  size="small" variant="contained" color="secondary" onClick={() => Remove(ele, index)}>
+                            <IconButton style={{height:'fit-content'}}  size="small" variant="contained" color="secondary" onClick={() => Remove(ele, index)}>
                                     <DeleteIcon fontSize="small" />
                             </IconButton >                   
                         </Li>
@@ -30,7 +29,6 @@ const PlayList = ({myPlayList, handleClick, handleRemove}) => {
                 </List>
             </PlayListWrapper>
          
-        </Fragment>
     )
 }
 

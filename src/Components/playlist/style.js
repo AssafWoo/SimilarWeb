@@ -15,7 +15,7 @@ export const List = styled.ul`
     list-style-type: none;
     overflow-y:auto;
     text-align:left;
-    height:40%;
+    height:78%;
     padding:0;
     transition: ease-in all .3s;
     .current {

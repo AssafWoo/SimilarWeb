@@ -17,18 +17,18 @@ const MainWrapper = () => {
     const [isFetching, setIsFetching] = useState(false)
 
 
-    useEffect(async () => { // intial call to server to get data in the playlist array.
-        db.ref("videos").on('value', snapshot => {
-            let videos = [];
-            snapshot.forEach((snap) => {
-                videos.push(snap.val());
-              });
-            setPlayList( videos );
-            if(playList) setCurrent(videos[0]);
-        })
+    useEffect(() => { // intial call to server to get data in the playlist array.
+            db.ref("videos").on('value', snapshot => {
+                let videos = [];
+                snapshot.forEach((snap) => {
+                    videos.push(snap.val());
+                });
+                setPlayList( videos );
+                if(playList) setCurrent(videos[0]);
+            })
     }, [])
 
-    useEffect(() => {
+    useEffect(() => { // channging the current after deletion or video is finished
         if(playList.length === 0) setCurrent([])
     },[playList])
 
@@ -40,7 +40,7 @@ const MainWrapper = () => {
       }, [searchValue])
 
 
-    const handleSubmit = useCallback(async () => { // submit button that checks if the value is valid.
+    const handleSubmit = useCallback(async () => {
         if(searchValue && validateURL(searchValue)){
             let videoID = extractIdFromURL(searchValue);
             try {
@@ -64,9 +64,9 @@ const MainWrapper = () => {
             }
         } else {
             setError(true)
-            setErrorMessage('Please enter a valid input')
+            setErrorMessage('Please enter a valid url')
         }
-    })
+    },[searchValue])
 
     const checkExist = (ele) => {
         for(let i = 0; i< playList.length; i++){
@@ -105,7 +105,7 @@ const MainWrapper = () => {
         <Wrapper>
             <Header>
                 <div>
-                    <TextField className="mg-right-3" value={searchValue} helperText={errorMessage} onChange={(e) => setSearchValue(e.target.value)}label="Enter Video URL" error={error}/>
+                    <TextField value={searchValue} helperText={errorMessage} onChange={(e) => setSearchValue(e.target.value)}label="Enter Video URL" error={error}/>
                     <Button disabled={isFetching} size="small" variant="contained" color="primary" type="submit" onClick={handleSubmit}>add</Button> 
                 </div>
             </Header>
