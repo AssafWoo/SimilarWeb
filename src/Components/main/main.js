@@ -44,15 +44,19 @@ const MainWrapper = () => {
         if(searchValue && validateURL(searchValue)){
             let videoID = extractIdFromURL(searchValue);
             try {
-                setIsFetching(true);
                 const myVideo = await FetchUrl(videoID)
-                console.log(myVideo);
-                setPlayList(playList =>[...playList, myVideo])
-                await db.ref("videos").push(myVideo);
-                setError(false)
-                setErrorMessage('')
-                setSearchValue('')
-                setIsFetching(false);
+                if(checkExist(myVideo)) {
+                    setError(true)
+                    setErrorMessage('Already Exists')
+                } else {
+                    setIsFetching(true);
+                    setPlayList(playList =>[...playList, myVideo])
+                    await db.ref("videos").push(myVideo);
+                    setError(false)
+                    setErrorMessage('')
+                    setSearchValue('')
+                    setIsFetching(false);
+                }
             } catch(e) {
                 setError(true)
                 setErrorMessage('Something went wrong...')
@@ -64,6 +68,13 @@ const MainWrapper = () => {
         }
     })
 
+    const checkExist = (ele) => {
+        for(let i = 0; i< playList.length; i++){
+            if(playList[i].id === ele.id) return true;
+        }
+        return false;
+    }
+
     const extractIdFromURL = (url) => {
         let id = url.substring(
             url.lastIndexOf("v=")+2, 
@@ -71,8 +82,6 @@ const MainWrapper = () => {
         );
         return id;
     }
-
-    const handleClick = (ele, index) => { if(playList.length > 0) setCurrent(playList[index]) }
 
     const handleFinishedVideo = () => {
         const myIndex = playList.indexOf(current);
@@ -82,7 +91,6 @@ const MainWrapper = () => {
 
 
     const handleRemove = async (ele) => {
-        const index = playList.indexOf(ele);
         let targetVideo;
         db.ref("videos").on('value', snapshot => {
             snapshot.forEach((snap) => {
@@ -102,7 +110,7 @@ const MainWrapper = () => {
                 </div>
             </Header>
             <FlexWrapper>
-            <PlayList handleRemove={handleRemove} myPlayList={playList} handleClick={handleClick}/>
+            <PlayList handleRemove={handleRemove} myPlayList={playList}/>
                 <FeaturedVideo handleFinishedVideo={handleFinishedVideo} id={current && current.id} />
             </FlexWrapper>
 
